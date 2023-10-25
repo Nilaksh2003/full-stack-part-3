@@ -25,6 +25,17 @@ let phoneNumbers=[
 app.get('/api/persons',(request,response)=>{
     response.json(phoneNumbers)
 })
+app.get('/api/persons/:id',(request,response)=>{
+    const id=Number(request.params.id)
+    const person=phoneNumbers.find(phoneNumber=>phoneNumber.id===id)
+    if(person)
+    {
+        response.json(person)
+    }
+    else{
+        response.status(204).end()
+    }
+})
 app.get('/info',(request,response)=>{
     const months = [
         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
