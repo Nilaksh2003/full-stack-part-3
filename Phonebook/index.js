@@ -28,6 +28,13 @@ app.get('/api/persons',(request,response)=>{
 })
 app.post('/api/persons',(request,response)=>{
   const phoneNumber=request.body
+  if(!phoneNumber.name||!phoneNumber.number){
+    response.status(400).json({'error':'Name and Number are required'}).end()
+  }
+  if(phoneNumbers.some(phone=>phone.name===phoneNumber.name))
+  {
+    response.status(400).json({'error':'Name must be unique'}).end()
+  }
   phoneNumber.id=Math.floor(Math.random()*(10000000-0+1))+1
   phoneNumbers.push(phoneNumber)
   response.json(phoneNumber)
