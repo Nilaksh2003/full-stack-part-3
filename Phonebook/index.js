@@ -36,6 +36,11 @@ app.get('/api/persons/:id',(request,response)=>{
         response.status(204).end()
     }
 })
+app.delete('/api/persons/:id',(request,response)=>{
+    const id =Number(request.params.id)
+    phoneNumbers=phoneNumbers.filter(phoneNumber=>phoneNumber.id!==id)
+    response.status(204).end()
+})
 app.get('/info',(request,response)=>{
     const months = [
         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
