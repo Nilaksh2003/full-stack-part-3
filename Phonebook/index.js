@@ -1,6 +1,9 @@
+const Person= require('./models/person')
+require('dotenv').config()
 const express = require('express');
 const morgan = require('morgan');
-const cors=require('cors')
+const cors=require('cors');
+const person = require('./models/person');
 const app=express()
 app.use(express.static('dist'))
 app.use(cors())
@@ -32,9 +35,11 @@ let phoneNumbers=[
     }
 ]
 app.get('/api/persons',(request,response)=>{
-    response.json(phoneNumbers)
+  Person.find({}).then((persons)=>{
+    response.json(persons)
+  })
 })
-app.post('/api/persons',(request,response)=>{
+/* app.post('/api/persons',(request,response)=>{
   const phoneNumber=request.body
   if(!phoneNumber.name||!phoneNumber.number){
     response.status(400).json({'error':'Name and Number are required'}).end()
@@ -46,6 +51,20 @@ app.post('/api/persons',(request,response)=>{
   phoneNumber.id=Math.floor(Math.random()*(10000000-0+1))+1
   phoneNumbers.push(phoneNumber)
   response.json(phoneNumber)
+}) */
+app.post('/api/persons',(request,response)=>{
+  debugger
+  const body=request.body
+  if (!body || !body.name || !body.number) {
+    return response.status(400).json({ error: 'content missing',data:body })
+  }
+  const person= new Person({
+    name:body.name,
+    number:body.number
+  })
+  person.save().then(savePerson=>{
+    response.json(savePerson)
+  })
 })
 app.get('/api/persons/:id',(request,response)=>{
     const id=Number(request.params.id)
@@ -66,7 +85,7 @@ app.delete('/api/persons/:id',(request,response)=>{
 app.get('/info',(request,response)=>{
     response.send(`<p>Phonebook has info for ${phoneNumbers.length} people <br> ${new Date()}</p>`)
 })
-const PORT = process.env.PORT|| 3001
+const PORT = process.env.PORT
 app.listen(PORT,()=>{
     console.log(`Server running on port${PORT}`)
 })
