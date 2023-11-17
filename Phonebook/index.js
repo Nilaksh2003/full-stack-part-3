@@ -12,6 +12,7 @@ morgan.token('req-body',(req)=>{
 })
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :req-body'))
 app.use(express.json());
+
 let phoneNumbers=[
     { 
       "id": 1,
@@ -34,10 +35,11 @@ let phoneNumbers=[
       "number": "39-23-6423122"
     }
 ]
-app.get('/api/persons',(request,response)=>{
+app.get('/api/persons',(request,response,next)=>{
   Person.find({}).then((persons)=>{
     response.json(persons)
   })
+  .catch(error=>next(error))
 })
 /* app.post('/api/persons',(request,response)=>{
   const phoneNumber=request.body
@@ -52,7 +54,7 @@ app.get('/api/persons',(request,response)=>{
   phoneNumbers.push(phoneNumber)
   response.json(phoneNumber)
 }) */
-app.post('/api/persons',(request,response)=>{
+app.post('/api/persons',(request,response,next)=>{
   debugger
   const body=request.body
   if (!body || !body.name || !body.number) {
@@ -65,6 +67,7 @@ app.post('/api/persons',(request,response)=>{
   person.save().then(savePerson=>{
     response.json(savePerson)
   })
+  .catch(error=>next(error))
 })
 app.get('/api/persons/:id',(request,response)=>{
     const id=request.params.id
@@ -82,10 +85,31 @@ app.delete('/api/persons/:id',(request,response,next)=>{
   .then(result=>{
     response.status(204).end()
   })
+  .catch(error=>{
+    next(error)
+  })
 })
 app.get('/info',(request,response)=>{
     response.send(`<p>Phonebook has info for ${phoneNumbers.length} people <br> ${new Date()}</p>`)
 })
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+
+// handler of requests with unknown endpoint
+app.use(unknownEndpoint)
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+
+  next(error)
+}
+
+// this has to be the last loaded middleware.
+app.use(errorHandler)
 const PORT = process.env.PORT
 app.listen(PORT,()=>{
     console.log(`Server running on port${PORT}`)
