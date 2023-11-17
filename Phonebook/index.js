@@ -69,16 +69,12 @@ app.post('/api/persons',(request,response,next)=>{
   })
   .catch(error=>next(error))
 })
-app.get('/api/persons/:id',(request,response)=>{
-    const id=request.params.id
-    const person=phoneNumbers.find(phoneNumber=>phoneNumber.id===id)
-    if(person)
-    {
-        response.json(person)
-    }
-    else{
-        response.status(204).end()
-    }
+app.get('/api/persons/:id',(request,response,next)=>{
+    Person.findById(request.params.id)
+    .then(person=>{
+      response.json(person)
+    })
+    .catch(error=>next(error))
 })
 app.put('/api/persons/:id',(request,response,next)=>{
   const person={
@@ -101,7 +97,11 @@ app.delete('/api/persons/:id',(request,response,next)=>{
   })
 })
 app.get('/info',(request,response)=>{
-    response.send(`<p>Phonebook has info for ${phoneNumbers.length} people <br> ${new Date()}</p>`)
+  Person.find({})
+  .then(persons=>{
+    response.send(`<p>Phonebook has info for ${persons.length} people <br> ${new Date()}</p>`)
+  })
+  .catch(error=>next(error))
 })
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
