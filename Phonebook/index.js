@@ -67,7 +67,7 @@ app.post('/api/persons',(request,response)=>{
   })
 })
 app.get('/api/persons/:id',(request,response)=>{
-    const id=Number(request.params.id)
+    const id=request.params.id
     const person=phoneNumbers.find(phoneNumber=>phoneNumber.id===id)
     if(person)
     {
@@ -77,10 +77,11 @@ app.get('/api/persons/:id',(request,response)=>{
         response.status(204).end()
     }
 })
-app.delete('/api/persons/:id',(request,response)=>{
-    const id =Number(request.params.id)
-    phoneNumbers=phoneNumbers.filter(phoneNumber=>phoneNumber.id!==id)
+app.delete('/api/persons/:id',(request,response,next)=>{
+  Person.findByIdAndDelete(request.params.id)
+  .then(result=>{
     response.status(204).end()
+  })
 })
 app.get('/info',(request,response)=>{
     response.send(`<p>Phonebook has info for ${phoneNumbers.length} people <br> ${new Date()}</p>`)
